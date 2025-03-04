@@ -4,10 +4,10 @@ module.exports = {
   theme: {
     extend: {
       colors:{
-        'amarillo': {
-          clarito: '#f7f2aa',
-          normal: '#f7ec54',
-          pollo: '#ffef00'
+        'rojo': {
+          claro: '#ffcccc',
+          normal: '#ff6666',
+          oscuro: '#cc0000'
         }
       },
       spacing:{

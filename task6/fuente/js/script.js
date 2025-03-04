@@ -1,37 +1,49 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const cardContainer = document.getElementById('card-container');
-    let page = 1;
-    let loading = false;
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    "x-api-key": "live_GFiVsS7eVPROZySe7FKZJ1KyzH1PU8S42mB5KO7Jun2JuISy2VKJ5vrlAlD5jznf"
+  });
 
-    const loadCards = async () => {
-        if (loading) return;
-        loading = true;
-        const response = await fetch(`https://api.example.com/data?page=${page}`);
-        const data = await response.json();
-        data.items.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <img src="${item.image}" alt="${item.title}">
-                <h3>${item.title}</h3>
-                <p>${item.text}</p>
-            `;
-            cardContainer.appendChild(card);
-        });
-        page++;
-        loading = false;
-    };
+  const requestOptions = {
+    method: 'GET',
+    headers: headers,
+    redirect: 'follow'
+  };
 
-    const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-            loadCards();
-        }
-    }, {
-        rootMargin: '0px',
-        threshold: 1.0
-    });
+  const fetchData = async () => {
+    try {
+      const response = await fetch("https://api.thedogapi.com/v1/images/search?limit=12", requestOptions);
+      const result = await response.json();
+      const container = document.getElementById('dog-container');
+      result.forEach(dog => {
+        const dogDiv = document.createElement('div');
+        dogDiv.classList.add('dog-card', 'p-4', 'border', 'rounded-lg', 'shadow-md', 'bg-white', 'dark:bg-gray-800', 'w-full');
 
-    observer.observe(document.querySelector('#scroll-anchor'));
+        const dogImg = document.createElement('img');
+        dogImg.src = dog.url;
+        dogImg.alt = "Dog Image";
+        dogImg.classList.add('w-full', 'h-64', 'object-cover', 'rounded-lg');
 
-    loadCards();
+        const dogText = document.createElement('p');
+        dogText.textContent = "Perros > Gatos";
+        dogText.classList.add('text-center', 'mt-2', 'text-rojo-normal');
+
+        dogDiv.appendChild(dogImg);
+        dogDiv.appendChild(dogText);
+        container.appendChild(dogDiv);
+      });
+    } catch (error) {
+      console.log('error', error);
+    } finally {
+      console.log('Fetch attempt finished.');
+    }
+  };
+
+  fetchData();
+
+  window.addEventListener('scroll', () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+      fetchData();
+    }
+  });
 });

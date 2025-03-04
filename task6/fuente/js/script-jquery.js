@@ -1,37 +1,50 @@
-$(document).ready(function() {
-    const $cardContainer = $('#card-container');
-    let page = 1;
-    let loading = false;
-
-    const loadCards = async () => {
-        if (loading) return;
-        loading = true;
-        const response = await fetch(`https://api.example.com/data?page=${page}`);
-        const data = await response.json();
-        data.items.forEach(item => {
-            const $card = $(`
-                <div class="card">
-                    <img src="${item.image}" alt="${item.title}">
-                    <h3>${item.title}</h3>
-                    <p>${item.text}</p>
-                </div>
-            `);
-            $cardContainer.append($card);
-        });
-        page++;
-        loading = false;
+jQuery(function() {
+    const headers = {
+      "Content-Type": "application/json",
+      "x-api-key": "live_GFiVsS7eVPROZySe7FKZJ1KyzH1PU8S42mB5KO7Jun2JuISy2VKJ5vrlAlD5jznf"
+    };
+  
+    const requestOptions = {
+      method: 'GET',
+      headers: headers,
+      redirect: 'follow'
     };
 
-    const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-            loadCards();
-        }
-    }, {
-        rootMargin: '0px',
-        threshold: 1.0
+    let isFetching = false;
+  
+    const fetchData = async () => {
+      if (isFetching) return;
+      isFetching = true;
+      try {
+        const response = await fetch("https://api.thedogapi.com/v1/images/search?limit=12", requestOptions);
+        const result = await response.json();
+        const container = $('#dog-container');
+        result.forEach(dog => {
+          const dogDiv = $('<div></div>').addClass('dog-card p-4 border rounded-lg shadow-md bg-white dark:bg-gray-800 w-full');
+  
+          const dogImg = $('<img>').attr('src', dog.url).attr('alt', 'Dog Image').addClass('w-full h-64 object-cover rounded-lg');
+  
+          const dogText = $('<p></p>').text('Perros > Gatos').addClass('text-center mt-2 text-rojo-normal');
+  
+          dogDiv.append(dogImg);
+          dogDiv.append(dogText);
+          container.append(dogDiv);
+        });
+      } catch (error) {
+        console.log('error', error);
+      } finally {
+        setTimeout(() => {
+          isFetching = false;
+          console.log('Fetch attempt finished.');
+        }, 500);
+      }
+    };
+  
+    fetchData();
+  
+    $(window).on('scroll', function() {
+      if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
+        fetchData();
+      }
     });
-
-    observer.observe(document.querySelector('#scroll-anchor'));
-
-    loadCards();
-});
+  });
